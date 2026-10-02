@@ -1,0 +1,46 @@
+table Dim_Product
+	lineageTag: 22e863f8-421f-447c-b4bf-e0e6ad677854
+
+	column item
+		dataType: string
+		lineageTag: f46b9c0a-9374-48ff-95d7-70a42ece8b57
+		summarizeBy: none
+		sourceColumn: item
+
+		annotation SummarizationSetBy = Automatic
+
+	column category
+		dataType: string
+		lineageTag: 606af1f0-3f76-4b6e-9893-f6f1cd54c12b
+		summarizeBy: none
+		sourceColumn: category
+
+		annotation SummarizationSetBy = Automatic
+
+	column unit_price
+		dataType: double
+		lineageTag: 5dfd2c91-e889-40b8-989d-f51b34863ace
+		summarizeBy: none
+		sourceColumn: unit_price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition Dim_Product = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\VISHAL S\brewmetrics-bi\brewmetrics_sales.csv"),[Delimiter=",", Columns=9, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"sale_id", Int64.Type}, {"date", type date}, {"city", type text}, {"store_format", type text}, {"category", type text}, {"item", type text}, {"quantity", Int64.Type}, {"unit_price", type number}, {"sales_amount", type number}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"sale_id", "date", "city", "store_format", "quantity", "sales_amount"}),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Removed Columns",{"item", "category", "unit_price"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Reordered Columns", {"item"})
+				in
+				    #"Removed Duplicates"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

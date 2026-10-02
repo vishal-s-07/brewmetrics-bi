@@ -1,0 +1,66 @@
+table Dim_Date
+	lineageTag: f337034b-2c96-4bef-b210-478bb2ce9774
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: d708e251-ee93-4301-9108-36f31c944a2c
+		summarizeBy: none
+		sourceColumn: Date
+
+		variation Variation
+			isDefault
+			relationship: 902a1fc7-d138-4587-bae2-ef1f863dec29
+			defaultHierarchy: LocalDateTable_21af728a-dac9-4aa8-8958-b430ca9d7e5e.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 40ac20bf-1920-4789-8f77-3420dcc5f611
+		summarizeBy: sum
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Name'
+		dataType: string
+		lineageTag: 678f0826-85ef-4ac8-acfa-5ef5c6a6636a
+		summarizeBy: none
+		sourceColumn: Month Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: int64
+		formatString: 0
+		lineageTag: a9344be6-56d3-4432-b105-99995e32bfca
+		summarizeBy: sum
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dim_Date = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\VISHAL S\brewmetrics-bi\brewmetrics_sales.csv"),[Delimiter=",", Columns=9, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"sale_id", Int64.Type}, {"date", type date}, {"city", type text}, {"store_format", type text}, {"category", type text}, {"item", type text}, {"quantity", Int64.Type}, {"unit_price", type number}, {"sales_amount", type number}}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Changed Type",{"date"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Other Columns",{{"date", "Date"}}),
+				    #"Inserted Year" = Table.AddColumn(#"Renamed Columns", "Year", each Date.Year([Date]), Int64.Type),
+				    #"Inserted Month" = Table.AddColumn(#"Inserted Year", "Month", each Date.Month([Date]), Int64.Type),
+				    #"Inserted Month Name" = Table.AddColumn(#"Inserted Month", "Month Name", each Date.MonthName([Date]), type text),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Inserted Month Name",{"Date", "Year", "Month Name", "Month"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Reordered Columns", {"Date"})
+				in
+				    #"Removed Duplicates"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
