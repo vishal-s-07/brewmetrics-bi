@@ -25,6 +25,17 @@ table Fact_Sales
 			```
 		lineageTag: 7f1f40e8-6ee0-4f0e-a177-cdd4f0d5b885
 
+	measure 'Item Sales Rank' = ```
+				RANKX(
+					ALL(Dim_Product[item]),
+					CALCULATE(SUM(Fact_Sales[sales_amount])),
+					,
+					DESC,
+					DENSE
+				)
+			```
+		lineageTag: 1d0b8a2f-b2b5-4cb3-8e2c-8c6b9a6b4c44
+
 	column sale_id
 		dataType: int64
 		formatString: 0
