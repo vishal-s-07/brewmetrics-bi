@@ -36,6 +36,14 @@ table Fact_Sales
 			```
 		lineageTag: 1d0b8a2f-b2b5-4cb3-8e2c-8c6b9a6b4c44
 
+	measure 'Average Transaction Value' = ```
+				DIVIDE(
+					SUM(Fact_Sales[sales_amount]),
+					DISTINCTCOUNT(Fact_Sales[sale_id])
+				)
+			```
+		lineageTag: 4cc1886c-11f7-46e3-a9a9-5fba5f879ca2
+
 	column sale_id
 		dataType: int64
 		formatString: 0

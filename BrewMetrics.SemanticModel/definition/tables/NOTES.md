@@ -58,3 +58,18 @@ RANKX(
     DESC,
     DENSE
 )
+
+## 4. Average Transaction Value
+
+### Copilot suggestion
+
+Copilot generated a custom measure that calculates total sales divided by the distinct number of sales transactions. The `DIVIDE` function safely handles empty or zero-transaction cases.
+
+### Measure
+
+```DAX
+Average Transaction Value =
+DIVIDE(
+    SUM(Fact_Sales[sales_amount]),
+    DISTINCTCOUNT(Fact_Sales[sale_id])
+)
